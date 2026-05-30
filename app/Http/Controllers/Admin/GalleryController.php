@@ -28,7 +28,8 @@ class GalleryController extends Controller
             'url' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        $disk = env('FILESYSTEM_DISK', 'public');
+        // Use vercel disk when on Vercel, otherwise use configured disk
+        $disk = (env('IS_NOW') || env('VERCEL')) ? 'vercel' : env('FILESYSTEM_DISK', 'public');
         if ($request->hasFile('url')) {
             $validated['url'] = $request->file('url')->store('gallery', $disk);
         }
@@ -52,7 +53,8 @@ class GalleryController extends Controller
             'url' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        $disk = env('FILESYSTEM_DISK', 'public');
+        // Use vercel disk when on Vercel, otherwise use configured disk
+        $disk = (env('IS_NOW') || env('VERCEL')) ? 'vercel' : env('FILESYSTEM_DISK', 'public');
         if ($request->hasFile('url')) {
             $oldUrl = $gallery->getRawOriginal('url');
             if ($oldUrl && Storage::disk($disk)->exists($oldUrl)) {

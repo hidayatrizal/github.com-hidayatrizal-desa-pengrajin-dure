@@ -34,7 +34,8 @@ class CraftsmanController extends Controller
             'wa' => 'nullable|string|max:20',
         ]);
 
-        $disk = env('FILESYSTEM_DISK', 'public');
+        // Use vercel disk when on Vercel, otherwise use configured disk
+        $disk = (env('IS_NOW') || env('VERCEL')) ? 'vercel' : env('FILESYSTEM_DISK', 'public');
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('craftsmen', $disk);
         }
@@ -64,7 +65,8 @@ class CraftsmanController extends Controller
             'wa' => 'nullable|string|max:20',
         ]);
 
-        $disk = env('FILESYSTEM_DISK', 'public');
+        // Use vercel disk when on Vercel, otherwise use configured disk
+        $disk = (env('IS_NOW') || env('VERCEL')) ? 'vercel' : env('FILESYSTEM_DISK', 'public');
         if ($request->hasFile('image')) {
             $oldImage = $craftsman->getRawOriginal('image');
             if ($oldImage && Storage::disk($disk)->exists($oldImage)) {
