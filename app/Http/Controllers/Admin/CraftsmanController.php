@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Storage;
 
 class CraftsmanController extends Controller
 {
+    private function getDisk()
+    {
+        return (getenv('VERCEL') !== false || ($_SERVER['VERCEL'] ?? null) === '1')
+            ? 'vercel' : env('FILESYSTEM_DISK', 'public');
+    }
+
     public function index()
     {
         $craftsmen = Craftsman::withCount('products')->orderBy('id', 'desc')->get();
@@ -34,11 +40,7 @@ class CraftsmanController extends Controller
             'wa' => 'nullable|string|max:20',
         ]);
 
-        // Determine disk based on environment (more reliable detection)
-        $isVercel = (getenv('IS_NOW') !== false || getenv('VERCEL') !== false ||
-                     isset($_SERVER['IS_NOW']) || isset($_SERVER['VERCEL']) ||
-                     (isset($_SERVER['VC_ENTRYPOINT']) && $_SERVER['VC_ENTRYPOINT'] === '1'));
-        $disk = $isVercel ? 'vercel' : env('FILESYSTEM_DISK', 'public');
+        $disk = $this->getDisk();
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('craftsmen', $disk);
         }
@@ -68,11 +70,7 @@ class CraftsmanController extends Controller
             'wa' => 'nullable|string|max:20',
         ]);
 
-        // Determine disk based on environment (more reliable detection)
-        $isVercel = (getenv('IS_NOW') !== false || getenv('VERCEL') !== false ||
-                     isset($_SERVER['IS_NOW']) || isset($_SERVER['VERCEL']) ||
-                     (isset($_SERVER['VC_ENTRYPOINT']) && $_SERVER['VC_ENTRYPOINT'] === '1'));
-        $disk = $isVercel ? 'vercel' : env('FILESYSTEM_DISK', 'public');
+        $disk = $this->getDisk();
         if ($request->hasFile('image')) {
             $oldImage = $craftsman->getRawOriginal('image');
             if ($oldImage && Storage::disk($disk)->exists($oldImage)) {
@@ -89,7 +87,7 @@ class CraftsmanController extends Controller
 
     public function destroy(Craftsman $craftsman)
     {
-        $disk = env('FILESYSTEM_DISK', 'public');
+        $disk = $this->getDisk();
         $oldImage = $craftsman->getRawOriginal('image');
         if ($oldImage && Storage::disk($disk)->exists($oldImage)) {
             Storage::disk($disk)->delete($oldImage);

@@ -10,15 +10,15 @@
       "IS_NOW": "1"
     }
   },
-  "buildCommand": "npm run build && php artisan config:cache && php artisan view:cache && php artisan storage:link --relative 2>/dev/null || true",
-    "routes": [
+  "buildCommand": "npm run build && php artisan storage:link --relative 2>/dev/null || true",
+  "routes": [
     {
       "src": "/build/assets/(.*)",
       "dest": "/public/build/assets/$1"
     },
     {
       "src": "/storage/(.*)",
-      "dest": "/tmp/storage/app/public/$1"
+      "dest": "/api/index.php"
     },
     {
       "src": "/hero\\.webp",
@@ -55,11 +55,6 @@
     "LOG_CHANNEL": "stderr",
     "CACHE_DRIVER": "array",
     "SESSION_DRIVER": "cookie",
-    "APP_CONFIG_CACHE": "/tmp/config.php",
-    "APP_EVENTS_CACHE": "/tmp/events.php",
-    "APP_PACKAGES_CACHE": "/tmp/packages.php",
-    "APP_ROUTES_CACHE": "/tmp/routes.php",
-    "APP_SERVICES_CACHE": "/tmp/services.php",
     "VIEW_COMPILED_PATH": "/tmp/views",
     "VERCEL": "1"
   }

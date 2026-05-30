@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
+    private function getDisk()
+    {
+        return (getenv('VERCEL') !== false || ($_SERVER['VERCEL'] ?? null) === '1')
+            ? 'vercel' : env('FILESYSTEM_DISK', 'public');
+    }
+
     public function index()
     {
         $products = Product::with(['craftsman', 'images'])->orderBy('id', 'desc')->paginate(20);
@@ -36,26 +42,18 @@ class ProductController extends Controller
             'additional_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        // Determine disk based on environment (more reliable detection)
-        $isVercel = (getenv('IS_NOW') !== false || getenv('VERCEL') !== false ||
-                     isset($_SERVER['IS_NOW']) || isset($_SERVER['VERCEL']) ||
-                     (isset($_SERVER['VC_ENTRYPOINT']) && $_SERVER['VC_ENTRYPOINT'] === '1'));
-        $disk = $isVercel ? 'vercel' : env('FILESYSTEM_DISK', 'public');
+        $disk = $this->getDisk();
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('products', $disk);
-            $validated['image'] = $path;
+            $validated['image'] = $request->file('image')->store('products', $disk);
         }
 
         $product = Product::create($validated);
 
-        // Use vercel disk when on Vercel, otherwise use configured disk
-        $disk = (env('IS_NOW') || env('VERCEL')) ? 'vercel' : env('FILESYSTEM_DISK', 'public');
         if ($request->hasFile('additional_images')) {
             foreach ($request->file('additional_images') as $index => $file) {
-                $path = $file->store('products', $disk);
                 ProductImage::create([
                     'product_id' => $product->id,
-                    'image' => $path,
+                    'image' => $file->store('products', $disk),
                     'sort_order' => $index,
                 ]);
             }
@@ -85,30 +83,22 @@ class ProductController extends Controller
             'additional_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        // Use vercel disk when on Vercel, otherwise use configured disk
-        $disk = (env('IS_NOW') || env('VERCEL')) ? 'vercel' : env('FILESYSTEM_DISK', 'public');
+        $disk = $this->getDisk();
         if ($request->hasFile('image')) {
             $oldImage = $product->getRawOriginal('image');
             if ($oldImage && Storage::disk($disk)->exists($oldImage)) {
                 Storage::disk($disk)->delete($oldImage);
             }
-            $path = $request->file('image')->store('products', $disk);
-            $validated['image'] = $path;
+            $validated['image'] = $request->file('image')->store('products', $disk);
         }
 
         $product->update($validated);
 
-        // Determine disk based on environment (more reliable detection)
-        $isVercel = (getenv('IS_NOW') !== false || getenv('VERCEL') !== false ||
-                     isset($_SERVER['IS_NOW']) || isset($_SERVER['VERCEL']) ||
-                     (isset($_SERVER['VC_ENTRYPOINT']) && $_SERVER['VC_ENTRYPOINT'] === '1'));
-        $disk = $isVercel ? 'vercel' : env('FILESYSTEM_DISK', 'public');
         if ($request->hasFile('additional_images')) {
             foreach ($request->file('additional_images') as $index => $file) {
-                $path = $file->store('products', $disk);
                 ProductImage::create([
                     'product_id' => $product->id,
-                    'image' => $path,
+                    'image' => $file->store('products', $disk),
                     'sort_order' => $product->images()->max('sort_order') + $index + 1,
                 ]);
             }
@@ -120,15 +110,10 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        // Use vercel disk when on Vercel, otherwise use configured disk
-        $disk = (env('IS_NOW') || env('VERCEL')) ? 'vercel' : env('FILESYSTEM_DISK', 'public');
-        if ($request->hasFile('image')) {
-            $oldImage = $product->getRawOriginal('image');
-            if ($oldImage && Storage::disk($disk)->exists($oldImage)) {
-                Storage::disk($disk)->delete($oldImage);
-            }
-            $path = $request->file('image')->store('products', $disk);
-            $validated['image'] = $path;
+        $disk = $this->getDisk();
+        $oldImage = $product->getRawOriginal('image');
+        if ($oldImage && Storage::disk($disk)->exists($oldImage)) {
+            Storage::disk($disk)->delete($oldImage);
         }
 
         foreach ($product->images as $img) {
@@ -150,7 +135,7 @@ class ProductController extends Controller
             abort(403);
         }
 
-        $disk = env('FILESYSTEM_DISK', 'public');
+        $disk = $this->getDisk();
         $imgRaw = $image->getRawOriginal('image');
         if ($imgRaw && Storage::disk($disk)->exists($imgRaw)) {
             Storage::disk($disk)->delete($imgRaw);

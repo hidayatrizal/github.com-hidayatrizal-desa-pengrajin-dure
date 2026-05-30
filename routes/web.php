@@ -5,6 +5,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ServeController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ProductController;
@@ -13,6 +14,10 @@ use App\Http\Controllers\Admin\GalleryController;
 use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\SettingController;
+
+// Serve uploaded files from /tmp (Vercel serverless)
+Route::get('/storage/{path}', [ServeController::class, 'serve'])
+    ->where('path', '.*');
 
 // Frontend Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');

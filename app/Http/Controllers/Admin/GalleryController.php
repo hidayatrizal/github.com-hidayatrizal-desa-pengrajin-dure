@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Storage;
 
 class GalleryController extends Controller
 {
+    private function getDisk()
+    {
+        return (getenv('VERCEL') !== false || ($_SERVER['VERCEL'] ?? null) === '1')
+            ? 'vercel' : env('FILESYSTEM_DISK', 'public');
+    }
+
     public function index()
     {
         $galleries = Gallery::orderBy('id', 'desc')->get();
@@ -28,11 +34,7 @@ class GalleryController extends Controller
             'url' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        // Determine disk based on environment (more reliable detection)
-        $isVercel = (getenv('IS_NOW') !== false || getenv('VERCEL') !== false ||
-                     isset($_SERVER['IS_NOW']) || isset($_SERVER['VERCEL']) ||
-                     (isset($_SERVER['VC_ENTRYPOINT']) && $_SERVER['VC_ENTRYPOINT'] === '1'));
-        $disk = $isVercel ? 'vercel' : env('FILESYSTEM_DISK', 'public');
+        $disk = $this->getDisk();
         if ($request->hasFile('url')) {
             $validated['url'] = $request->file('url')->store('gallery', $disk);
         }
@@ -56,11 +58,7 @@ class GalleryController extends Controller
             'url' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        // Determine disk based on environment (more reliable detection)
-        $isVercel = (getenv('IS_NOW') !== false || getenv('VERCEL') !== false ||
-                     isset($_SERVER['IS_NOW']) || isset($_SERVER['VERCEL']) ||
-                     (isset($_SERVER['VC_ENTRYPOINT']) && $_SERVER['VC_ENTRYPOINT'] === '1'));
-        $disk = $isVercel ? 'vercel' : env('FILESYSTEM_DISK', 'public');
+        $disk = $this->getDisk();
         if ($request->hasFile('url')) {
             $oldUrl = $gallery->getRawOriginal('url');
             if ($oldUrl && Storage::disk($disk)->exists($oldUrl)) {
@@ -77,7 +75,7 @@ class GalleryController extends Controller
 
     public function destroy(Gallery $gallery)
     {
-        $disk = env('FILESYSTEM_DISK', 'public');
+        $disk = $this->getDisk();
         $oldUrl = $gallery->getRawOriginal('url');
         if ($oldUrl && Storage::disk($disk)->exists($oldUrl)) {
             Storage::disk($disk)->delete($oldUrl);
