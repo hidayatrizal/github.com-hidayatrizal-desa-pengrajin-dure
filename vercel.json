@@ -11,14 +11,14 @@
     }
   },
   "buildCommand": "npm run build && php artisan storage:link --relative 2>/dev/null || true",
-  "routes": [
+    "routes": [
     {
       "src": "/build/assets/(.*)",
       "dest": "/public/build/assets/$1"
     },
     {
       "src": "/storage/(.*)",
-      "dest": "/public/storage/$1"
+      "dest": "/tmp/storage/app/public/$1"
     },
     {
       "src": "/hero\\.webp",
