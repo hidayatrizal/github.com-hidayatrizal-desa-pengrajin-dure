@@ -1,0 +1,49 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "/api/index.php",
+      "use": "@vercel/php"
+    },
+    {
+      "src": "/public/build/assets/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "/public/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/build/assets/(.*)",
+      "dest": "/public/build/assets/$1"
+    },
+    {
+      "src": "/favicon.ico",
+      "headers": {
+        "Content-Type": "image/x-icon"
+      },
+      "dest": "/public/favicon.ico"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.php"
+    }
+  ],
+  "env": {
+    "APP_NAME": "Desa Pengrajin Dure",
+    "APP_ENV": "production",
+    "APP_DEBUG": "false",
+    "APP_URL": "https://desa-pengrajin-dure.vercel.app",
+    "LOG_CHANNEL": "stderr",
+    "CACHE_DRIVER": "array",
+    "SESSION_DRIVER": "array",
+    "APP_CONFIG_CACHE": "/tmp/config.php",
+    "APP_EVENTS_CACHE": "/tmp/events.php",
+    "APP_PACKAGES_CACHE": "/tmp/packages.php",
+    "APP_ROUTES_CACHE": "/tmp/routes.php",
+    "APP_SERVICES_CACHE": "/tmp/services.php",
+    "VIEW_COMPILED_PATH": "/tmp/views"
+  }
+}
