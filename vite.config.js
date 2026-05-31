@@ -9,4 +9,7 @@ export default defineConfig({
             assets: ['public/**'],
         }),
     ],
+    build: {
+        outDir: 'dist', // 👈 Output ke dist/ bukan public/build/
+    },
 });

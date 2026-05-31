@@ -13,8 +13,8 @@
   "buildCommand": "npm run build && php artisan storage:link --relative 2>/dev/null || true",
   "routes": [
     {
-      "src": "/build/assets/(.*)",
-      "dest": "/public/build/assets/$1"
+      "src": "/assets/(.*)",
+      "dest": "/dist/assets/$1"
     },
     {
       "src": "/storage/(.*)",
