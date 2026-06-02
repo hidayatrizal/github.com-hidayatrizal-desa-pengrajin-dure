@@ -52,12 +52,17 @@
   "env": {
     "APP_NAME": "Desa Pengrajin Dure",
     "APP_ENV": "production",
-    "APP_DEBUG": "true",
+    "APP_DEBUG": "false",
     "LOG_CHANNEL": "stderr",
     "CACHE_DRIVER": "array",
     "SESSION_DRIVER": "cookie",
     "VIEW_COMPILED_PATH": "/tmp/views",
     "DB_CONNECTION": "pgsql",
+    "DB_HOST": "ep-noisy-sea-aqasinw1-pooler.c-8.us-east-1.aws.neon.tech",
+    "DB_PORT": "5432",
+    "DB_DATABASE": "neondb",
+    "DB_USERNAME": "neondb_owner",
+    "DB_PASSWORD": "npg_0QycCZO1JHKM",
     "APP_KEY": "base64:RySmqNnqCZRsKrPBVIDxV2Xbrw+uFErqpd2ozSDLhpY=",
     "VERCEL": "1"
   }

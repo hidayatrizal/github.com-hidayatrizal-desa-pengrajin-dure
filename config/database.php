@@ -77,17 +77,21 @@ return [
             'search_path' => 'public',
             'sslmode' => 'require',
             'options' => (function () {
-                $custom = env('DB_OPTIONS');
-                if ($custom) {
-                    return $custom;
-                }
+                // Build Neon.tech endpoint option string for sslmode
                 $url = env('DATABASE_URL');
                 $hostFromUrl = $url ? (parse_url($url, PHP_URL_HOST) ?? '') : '';
                 $host = $hostFromUrl ?: env('DB_HOST', '');
-                if (str_contains($host, 'neon.tech')) {
-                    return 'endpoint=' . explode('.', $host)[0];
+                $endpointOption = env('DB_OPTIONS');
+                if (!$endpointOption && str_contains($host, 'neon.tech')) {
+                    $endpointOption = 'endpoint=' . explode('.', $host)[0];
                 }
-                return null;
+                // PDO options must be an array
+                if ($endpointOption) {
+                    return [
+                        \PDO::ATTR_EMULATE_PREPARES => true,
+                    ];
+                }
+                return [];
             })(),
         ],
 
